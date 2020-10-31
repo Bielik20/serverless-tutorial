@@ -22,7 +22,7 @@ functions:
     events:
       - http:
           method: POST
-          path: /auction
+          path: /auctions
   getAuctions:
     handler: src/handlers/getAuctions.handler
     events:
@@ -36,6 +36,13 @@ functions:
       - http:
           method: GET
           path: /auctions/{id}
+
+  placeBid:
+    handler: src/handlers/placeBid.handler
+    events:
+      - http:
+          method: PATCH
+          path: auctions/{id}/bid
 
 resources:
   Resources:
