@@ -1,6 +1,7 @@
 import AWS from 'aws-sdk';
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
+const sqs = new AWS.SQS();
 
 export async function closeAuction(auction) {
   const params = {
@@ -16,4 +17,31 @@ export async function closeAuction(auction) {
   };
 
   await dynamodb.update(params).promise();
+
+  const { title, seller, highestBid } = auction;
+  const { amount, bidder } = highestBid;
+
+  const notifySeller = sqs
+    .sendMessage({
+      QueueUrl: process.env.MAIL_QUEUE_URL,
+      MessageBody: JSON.stringify({
+        subject: 'Your item has been sold!',
+        recipient: seller,
+        body: `Great! Your item "${title}" has been sold for $${amount}.`,
+      }),
+    })
+    .promise();
+
+  const notifyBidder = sqs
+    .sendMessage({
+      QueueUrl: process.env.MAIL_QUEUE_URL,
+      MessageBody: JSON.stringify({
+        subject: 'You won an auction!',
+        recipient: bidder,
+        body: `Great! You bought "${title}" for $${amount}.`,
+      }),
+    })
+    .promise();
+
+  await Promise.all([notifySeller, notifyBidder]);
 }
