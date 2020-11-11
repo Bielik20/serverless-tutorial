@@ -5,7 +5,7 @@ AuctionsBucket:
     LifecycleConfiguration:
       Rules:
         - Id: ExpirePicture
-          Status: Enable
+          Status: Enabled
           ExpirationInDays: 1
 
 AuctionsBucketPolicy:
